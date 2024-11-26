@@ -2,12 +2,26 @@
 #include <iostream>
 
 #include "sort.hpp"
+#include "test_generator.hpp"
 
-std::chrono::milliseconds test_time(int size) {
-
+int test_time(const int size) {
+    int arr[size];
+    gen_test_random(arr, size);
+    auto start = std::chrono::high_resolution_clock::now();
+    sort(arr, size);
+    auto end = std::chrono::high_resolution_clock::now();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 }
 
 int main() {
-
+    const int t = 5;
+    const int size = 1e8;
+    int sum = 0;
+    for (int i = 0; i < t; ++i) {
+        int value = test_time(size);
+        sum += value;
+        std::cout << "launch " << i << " time: " << value << " ms\n";
+    }
+    std::cout << "average time: " << sum / t << " ms\n";
     return 0;
 }
