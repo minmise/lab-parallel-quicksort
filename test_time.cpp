@@ -10,7 +10,7 @@ int test_time(const int size) {
     auto start = std::chrono::high_resolution_clock::now();
     sort(arr, size);
     auto end = std::chrono::high_resolution_clock::now();
-    delete arr;
+    delete[] arr;
     return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 }
 

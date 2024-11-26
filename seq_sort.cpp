@@ -3,7 +3,7 @@
 
 #include "sort.hpp"
 
-void quicksort(int *arr, int size) {
+static void quicksort(int *arr, int size) {
     if (size <= 1) {
         return;
     }
