@@ -37,7 +37,6 @@ void quicksort(int *arr, int size) {
         std::swap(arr[--right_pivot_eq], arr[left_pointer]);
     }
     right_pointer = left_pointer - 1;
-    ++left_pointer;
     for (int i = 0; i <= left_pivot_eq; ++i, --right_pointer) {
         std::swap(arr[i], arr[right_pointer]);
     }
@@ -49,5 +48,5 @@ void quicksort(int *arr, int size) {
 }
 
 void sort(int *arr, int size) {
-
+    quicksort(arr, size);
 }

@@ -61,6 +61,38 @@ bool test_simple_5() {
     return test_arr_is_sorted(arr, size);
 }
 
+bool test_simple_6() {
+    // [3, 2, 2, 2, 2, 2] -> [2, 2, 2, 2, 2, 3]
+    const int size = 6;
+    int arr[size] = {3, 2, 2, 2, 2, 2};
+    sort(arr, size);
+    return test_arr_is_sorted(arr, size);
+}
+
+bool test_simple_7() {
+    // [2, 2, 2, 2, 2, 1] -> [1, 2, 2, 2, 2, 2]
+    const int size = 6;
+    int arr[size] = {2, 2, 2, 2, 2, 1};
+    sort(arr, size);
+    return test_arr_is_sorted(arr, size);
+}
+
+bool test_simple_8() {
+    // [3, 2, 2, 2, 2, 2, 1] -> [1, 2, 2, 2, 2, 2, 3]
+    const int size = 7;
+    int arr[size] = {3, 2, 2, 2, 2, 2, 1};
+    sort(arr, size);
+    return test_arr_is_sorted(arr, size);
+}
+
+bool test_simple_9() {
+    // [2, 2, 2, 2, 2] -> [2, 2, 2, 2, 2]
+    const int size = 5;
+    int arr[size] = {2, 2, 2, 2, 2};
+    sort(arr, size);
+    return test_arr_is_sorted(arr, size);
+}
+
 bool test_big_random() {
     // [...] (1e8) -> [...] (1e8) sorted
     const int size = 1e8;
@@ -84,6 +116,10 @@ int main() {
     assert(test_simple_3());
     assert(test_simple_4());
     assert(test_simple_5());
+    assert(test_simple_6());
+    assert(test_simple_7());
+    assert(test_simple_8());
+    assert(test_simple_9());
     assert(test_big_random());
     std::cout << "Correct!\n";
     return 0;    
