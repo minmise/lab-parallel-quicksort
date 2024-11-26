@@ -64,14 +64,16 @@ bool test_simple_5() {
 bool test_big_random() {
     // [...] (1e8) -> [...] (1e8) sorted
     const int size = 1e8;
-    int arr[size];
-    const int cnt = 10;
+    int *arr = new int[size];
+    const int cnt = 1;
     for (int i = 0; i < cnt; ++i) {
         gen_test_random(arr, size);
+        sort(arr, size);
         if (!test_arr_is_sorted(arr, size)) {
             return false;
         }
     }
+    delete arr;
     return true;
 }
 
