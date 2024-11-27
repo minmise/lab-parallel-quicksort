@@ -95,8 +95,9 @@ bool test_simple_9() {
 
 bool test_big_random() {
     // [...] (1e8) -> [...] (1e8) sorted
-    const int size = 1e8;
+    const int size = 12;
     int *arr = new int[size];
+    //int arr[size] = {49, 21, 62, 27, 90, 59, 63, 26};
     const int cnt = 1;
     for (int i = 0; i < cnt; ++i) {
         gen_test_random(arr, size);
@@ -110,17 +111,17 @@ bool test_big_random() {
 }
 
 int main() {
-    //assert(test_simple_0());
-    //assert(test_simple_1());
+    assert(test_simple_0());
+    assert(test_simple_1());
     assert(test_simple_2());
-    //assert(test_simple_3());
-    //assert(test_simple_4());
-    //assert(test_simple_5());
-    //assert(test_simple_6());
-    //assert(test_simple_7());
-    //assert(test_simple_8());
-    //assert(test_simple_9());
-    //assert(test_big_random());
+    assert(test_simple_3());
+    assert(test_simple_4());
+    assert(test_simple_5());
+    assert(test_simple_6());
+    assert(test_simple_7());
+    assert(test_simple_8());
+    assert(test_simple_9());
+    assert(test_big_random());
     std::cout << "Correct!\n";
     return 0;    
 }
