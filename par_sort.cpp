@@ -4,55 +4,12 @@
 #include <omp.h>
 #include <random>
 
-#include "sort.hpp"
+#include "seq_sort.hpp"
+#include "par_sort.hpp"
 
 static int get_block_size() {
-    static const int BLOCK_SIZE = 40'000'000;
+    static const int BLOCK_SIZE = 50'000'000;
     return BLOCK_SIZE;
-}
-
-static void seq_sort(int *arr, int size) {
-    if (size <= 1) {
-        return;
-    }
-    std::swap(arr[rand() % size], arr[size - 1]);
-    int pivot = arr[size - 1];
-    int left_pointer = 0;
-    int left_pivot_eq = -1;
-    int right_pointer = size - 2;
-    int right_pivot_eq = size - 1;
-    while (left_pointer <= right_pointer) {
-        while (left_pointer < size && arr[left_pointer] < pivot) {
-            ++left_pointer;
-        }
-        while (right_pointer > left_pointer && arr[right_pointer] > pivot) {
-            --right_pointer;
-        }
-        if (left_pointer >= right_pointer) {
-            break;
-        }
-        std::swap(arr[left_pointer], arr[right_pointer]);
-        if (arr[left_pointer] == pivot) {
-            std::swap(arr[++left_pivot_eq], arr[left_pointer]);
-        }
-        if (arr[right_pointer] == pivot) {
-            std::swap(arr[--right_pivot_eq], arr[right_pointer]);
-        }
-        ++left_pointer;
-        --right_pointer;
-    }
-    if (arr[left_pointer] == pivot && left_pointer < right_pivot_eq) {
-        std::swap(arr[--right_pivot_eq], arr[left_pointer]);
-    }
-    right_pointer = left_pointer - 1;
-    for (int i = 0; i <= left_pivot_eq; ++i, --right_pointer) {
-        std::swap(arr[i], arr[right_pointer]);
-    }
-    for (int i = size - 1; i >= right_pivot_eq; --i, ++left_pointer) {
-        std::swap(arr[i], arr[left_pointer]);
-    }
-    seq_sort(arr, right_pointer + 1);
-    seq_sort(arr + left_pointer, size - left_pointer);
 }
 
 template<typename F1, typename F2>
@@ -77,12 +34,6 @@ static void map(int *arr, int size, F &&func) {
 }
 
 static void scan(int *arr, int size) {
-    if (size <= get_block_size()) {
-        for (int i = 1; i < size; ++i) {
-            arr[i] += arr[i - 1];
-        }
-        return;
-    }
     int blocked_size = (size + get_block_size() - 1) / get_block_size();
     int *sums = new int[blocked_size];
     #pragma omp taskloop 
@@ -92,7 +43,9 @@ static void scan(int *arr, int size) {
             sums[block] += arr[i];
         }
     }
-    scan(sums, blocked_size);
+    for (int i = 1; i < blocked_size; ++i) {
+        sums[i] += sums[i - 1];
+    }
     #pragma omp taskloop 
     for (int block = 0; block < blocked_size; ++block) {
         if (block != 0) {
@@ -111,7 +64,6 @@ static void filter(int *arr, int size, P &&predicate, int &new_size, int *sums, 
     for (int i = 0; i < size; ++i) {
         sums[i] = arr[i];
     }
-    // #pragma omp taskwait
     map(sums, size, predicate);
     scan(sums, size);
     new_size = sums[size - 1];
@@ -121,12 +73,10 @@ static void filter(int *arr, int size, P &&predicate, int &new_size, int *sums, 
             result[sums[i] - 1] = arr[i];
         }
     }
-    // #pragma omp taskwait
     #pragma omp taskloop 
     for (int i = 0; i < new_size; ++i) {
         arr[i] = result[i];
     }
-    // #pragma omp taskwait
 }
 
 static void quicksort(int *arr, int size, int *arr_copy_left, int *arr_copy_mid, int *arr_copy_right,
@@ -190,7 +140,7 @@ int *arr_sums_left, int *arr_sums_mid, int *arr_sums_right, int *arr_result_left
     });
 }
 
-void sort(int *arr, int size, int *arr_copy_left, int *arr_copy_mid, int *arr_copy_right,
+void par_sort(int *arr, int size, int *arr_copy_left, int *arr_copy_mid, int *arr_copy_right,
 int *arr_sums_left, int *arr_sums_mid, int *arr_sums_right, int *arr_result_left, int *arr_result_mid, int *arr_result_right) {
     static const int NUM_THREADS = 4;
     #pragma omp parallel num_threads(NUM_THREADS)

@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <random>
 
-#include "sort.hpp"
+#include "seq_sort.hpp"
 
 static void quicksort(int *arr, int size) {
     if (size <= 1) {
@@ -47,7 +47,6 @@ static void quicksort(int *arr, int size) {
     quicksort(arr + left_pointer, size - left_pointer);
 }
 
-void sort(int *arr, int size, int *arr_copy_left, int *arr_copy_mid, int *arr_copy_right,
-int *arr_sums_left, int *arr_sums_mid, int *arr_sums_right, int *arr_result_left, int *arr_result_mid, int *arr_result_right) {
+void seq_sort(int *arr, int size) {
     quicksort(arr, size);
 }

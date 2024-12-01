@@ -1,35 +1,11 @@
-std_correctness_compile:
-	g++-12 -O2 std_sort.cpp test_correctness.cpp test_generator.cpp -o std_test_correctness.out
+correctness_compile:
+	g++-12 -O2 seq_sort.cpp par_sort.cpp test_correctness.cpp test_generator.cpp -fopenmp -o correctness.out
 
-seq_correctness_compile:
-	g++-12 -O2 seq_sort.cpp test_correctness.cpp test_generator.cpp -o seq_test_correctness.out
+correctness_run:
+	./correctness.out
 
-par_correctness_compile:
-	g++-12 -O2 par_sort.cpp test_correctness.cpp test_generator.cpp -fopenmp -o par_test_correctness.out
+time_compile:
+	g++-12 -O2 seq_sort.cpp par_sort.cpp test_time.cpp test_generator.cpp -fopenmp -o time.out
 
-std_correctness_run:
-	./std_test_correctness.out
-
-seq_correctness_run:
-	./seq_test_correctness.out
-
-par_correctness_run:
-	./par_test_correctness.out
-
-std_time_compile:
-	g++-12 -O2 std_sort.cpp test_time.cpp test_generator.cpp -o std_test_time.out
-
-seq_time_compile:
-	g++-12 -O2 seq_sort.cpp test_time.cpp test_generator.cpp -o seq_test_time.out
-
-par_time_compile:
-	g++-12 -O2 par_sort.cpp test_time.cpp test_generator.cpp -fopenmp -o par_test_time.out
-
-std_time_run:
-	./std_test_time.out
-
-seq_time_run:
-	./seq_test_time.out
-
-par_time_run:
-	./par_test_time.out
+time_run:
+	./time.out
