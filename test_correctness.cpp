@@ -125,10 +125,10 @@ void print_arr(int *arr, int size) {
 
 bool test_big_random() {
     // [...] (1e8) -> [...] (1e8) sorted
-    const int size = 100000;
+    const int size = 1e8;
     int *arr = new int[size];
     //int arr[size] = {49, 21, 62, 27, 90, 59, 63, 26};
-    const int cnt = 1;
+    const int cnt = 5;
     for (int i = 0; i < cnt; ++i) {
         gen_test_random(arr, size);
         //print_arr(arr, size);

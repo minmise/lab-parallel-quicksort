@@ -7,7 +7,7 @@
 #include "sort.hpp"
 
 static int get_block_size() {
-    static const int BLOCK_SIZE = 5e7;
+    static const int BLOCK_SIZE = 40'000'000;
     return BLOCK_SIZE;
 }
 
@@ -70,68 +70,50 @@ static void fork2join(F1 &&func_lhs, F2 &&func_rhs) {
 
 template<typename F>
 static void map(int *arr, int size, F &&func) {
-    #pragma omp taskloop
+    #pragma omp taskloop 
     for (int i = 0; i < size; ++i) {
         arr[i] = func(arr[i]);
     }
 }
 
-template<typename F>
-static void down(int *sumLeft, int v, int *arr, int size, F &&func, int left) {
+static void scan(int *arr, int size) {
     if (size <= get_block_size()) {
-        for (int i = 0; i < size; ++i) {
-            arr[i] = func(left, arr[i]);
-            left = arr[i];
+        for (int i = 1; i < size; ++i) {
+            arr[i] += arr[i - 1];
         }
         return;
     }
-    int mid = size / 2;
-    fork2join([&]() {
-        down(sumLeft, v * 2 + 1, arr, mid, func, left);
-    }, [&]() {
-        down(sumLeft, v * 2 + 2, arr + mid, size - mid, func, func(left, sumLeft[v * 2 + 1]));
-    });
-}
-
-template<typename F>
-static int up(int *sumLeft, int v, int *arr, int size, F &&func) {
-    if (size <= get_block_size()) {
-        sumLeft[v] = arr[0];
-        for (int i = 1; i < size; ++i) {
-            sumLeft[v] = func(sumLeft[v], arr[i]);
+    int blocked_size = (size + get_block_size() - 1) / get_block_size();
+    int *sums = new int[blocked_size];
+    #pragma omp taskloop 
+    for (int block = 0; block < blocked_size; ++block) {
+        sums[block] = 0;
+        for (int i = block * get_block_size(); i < size && i < (block + 1) * get_block_size(); ++i) {
+            sums[block] += arr[i];
         }
-        return sumLeft[v];
     }
-    int mid = size / 2;
-    int left, right;
-    fork2join([&]() {
-        left = up(sumLeft, v * 2 + 1, arr, mid, func);
-    }, [&]() {
-        right = up(sumLeft, v * 2 + 2, arr + mid, size - mid, func);
-    });
-    sumLeft[v] = func(left, right);
-    return sumLeft[v];
-}
-
-template<typename F>
-static void scan(int *arr, int size, F &&func, int neutral) {
-    int *sumLeft = new int[size * 4];
-    up(sumLeft, 0, arr, size, func);
-    down(sumLeft, 0, arr, size, func, neutral);
-    delete[] sumLeft;
+    scan(sums, blocked_size);
+    #pragma omp taskloop 
+    for (int block = 0; block < blocked_size; ++block) {
+        if (block != 0) {
+            arr[block * get_block_size()] += sums[block - 1];
+        }
+        for (int i = block * get_block_size() + 1; i < size && i < (block + 1) * get_block_size(); ++i) {
+            arr[i] += arr[i - 1];
+        }
+    }
+    delete[] sums;
 }
 
 template<typename P>
 static void filter(int *arr, int size, P &&predicate, int &new_size, int *sums, int *result) {
-    #pragma omp taskloop
+    #pragma omp taskloop 
     for (int i = 0; i < size; ++i) {
         sums[i] = arr[i];
     }
     // #pragma omp taskwait
     map(sums, size, predicate);
-    scan(sums, size, [&](int lhs, int rhs) {
-        return lhs + rhs;
-    }, 0);
+    scan(sums, size);
     new_size = sums[size - 1];
     #pragma omp taskloop
     for (int i = 0; i < size; ++i) {
@@ -140,7 +122,7 @@ static void filter(int *arr, int size, P &&predicate, int &new_size, int *sums, 
         }
     }
     // #pragma omp taskwait
-    #pragma omp taskloop
+    #pragma omp taskloop 
     for (int i = 0; i < new_size; ++i) {
         arr[i] = result[i];
     }
@@ -154,7 +136,7 @@ int *arr_sums_left, int *arr_sums_mid, int *arr_sums_right, int *arr_result_left
         return;
     }
     int pivot = arr[rand() % size];
-    #pragma omp taskloop
+    #pragma omp taskloop 
     for (int i = 0; i < size; ++i) {
         arr_copy_left[i] = arr[i];
         arr_copy_mid[i] = arr[i];
@@ -180,7 +162,7 @@ int *arr_sums_left, int *arr_sums_mid, int *arr_sums_right, int *arr_result_left
         }, right_size, arr_sums_right, arr_result_right);
     }
     //#pragma omp taskwait
-    #pragma omp taskloop
+    #pragma omp taskloop 
     for (int i = 0; i < size; ++i) {
         int index = i;
         if (index < left_size) {
